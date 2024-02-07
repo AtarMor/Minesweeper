@@ -12,7 +12,6 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min) + min)
 }
 
-
 function showModal() {
     const elModal = document.querySelector('.modal')
     elModal.classList.remove('hide')

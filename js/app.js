@@ -3,6 +3,9 @@
 const MINE = '*'
 const EMPTY = ''
 const FLAG = '🚩'
+const SMILEY = '😃'
+const LOSS = '🤯'
+const VICTORY = '😎'
 
 var gGame
 var gBoard
@@ -11,22 +14,25 @@ var gLevel = {
     mines: 2
 }
 var gTimerInterval
+var gLives
 
 function onInit() {
     hideModal()
-    clearInterval(gTimerInterval)
-    /// set time to 00:00
+    restartTimer()
+    gLives = gLevel.mines > 2 ? 3 : 2
     gGame = {
         isOn: true,
         shownCount: 0,
         markedCount: 0,
-        secsPassed: 0
+        lives: gLives,
     }
     gBoard = buildBoard()
-    // setMinesLocations()
+    setMinesLocations()
     setMinesNegsCount()
     renderBoard()
-    console.table(gBoard)
+    renderLives()
+    const elSmiley = document.querySelector('.smiley-btn')
+    elSmiley.innerText = SMILEY
 }
 
 function buildBoard() {
@@ -42,7 +48,7 @@ function buildBoard() {
             }
         }
     }
-    board[1][1].isMine = board[2][3].isMine = true
+    // board[1][1].isMine = board[2][3].isMine = true
     return board
 }
 
@@ -59,6 +65,14 @@ function renderBoard() {
     }
     const elBoard = document.querySelector('.board')
     elBoard.innerHTML = strHTML
+}
+
+function renderLives() {
+    var livesStr = ''
+    for (let i = 0; i < gGame.lives; i++) {
+        livesStr += '❤️'
+        document.querySelector('.lives').innerText = livesStr
+    }
 }
 
 function setMinesNegsCount() {
@@ -85,7 +99,10 @@ function countNegsMines(rowIdx, colIdx) {
 
 function setMinesLocations() {
     for (let i = 0; i < gLevel.mines; i++) {
-        const randCell = getRandCell()
+        var randCell = getRandCell()
+        while (gBoard[randCell.i][randCell.j].isMine) {
+            randCell = getRandCell()
+        }
         gBoard[randCell.i][randCell.j].isMine = true
     }
 }
@@ -99,13 +116,13 @@ function onCellClicked(elCell, i, j) {
     if (gBoard[i][j].isMine && gBoard[i][j].isMarked) return
 
     if (gBoard[i][j].isMine) {
-        renderCell({ i, j }, MINE)
         elCell.classList.add('mine')
-        return gameOver()
+        renderCell({ i, j }, MINE)
+        reduceLives()
+        if (!gGame.lives) return gameOver()
     } else {
         expandShown(i, j)
     }
-
     checkVictory()
 }
 
@@ -132,7 +149,6 @@ function expandShown(rowIdx, colIdx) {
     gBoard[rowIdx][colIdx].isShown = true
     gGame.shownCount++
     startTimer()
-    console.log('gGame.shownCount:', gGame.shownCount)
     const elCell = document.querySelector(`.cell-${rowIdx}-${colIdx}`)
     elCell.classList.add('shown')
 
@@ -151,12 +167,17 @@ function expandShown(rowIdx, colIdx) {
 }
 
 function checkVictory() {
-    if (gGame.markedCount !== gLevel.mines) return
+    const exposedMines = gLives - gGame.lives
+    if (gGame.markedCount + exposedMines !== gLevel.mines) return
     if (gGame.shownCount !== gLevel.size ** 2 - gLevel.mines) return
+    const elSmiley = document.querySelector('.smiley-btn')
+    elSmiley.innerText = VICTORY
     endGame('You Won!')
 }
 
 function gameOver() {
+    const elSmiley = document.querySelector('.smiley-btn')
+    elSmiley.innerText = LOSS
     endGame('Game Over!')
 }
 
@@ -187,18 +208,29 @@ function startTimer() {
             const timeDiff = Date.now() - startTime
             const seconds = getSeconds(timeDiff)
             const minutes = getMinutes(timeDiff)
-            document.querySelector('span.seconds').innerText = seconds
-            document.querySelector('span.minutes').innerText = minutes
+            document.querySelector('.seconds').innerText = seconds
+            document.querySelector('.minutes').innerText = minutes
         }, 1000)
     }
 }
 
-    function getSeconds(timeDiff) {
-        const seconds = new Date(timeDiff).getSeconds()
-        return (seconds + '').padStart(2, '0')
-    }
+function getSeconds(timeDiff) {
+    const seconds = new Date(timeDiff).getSeconds()
+    return (seconds + '').padStart(2, '0')
+}
 
-    function getMinutes(timeDiff) {
-        const minutes = new Date(timeDiff).getMinutes()
-        return (minutes + '').padStart(2, '0')
-    }
+function getMinutes(timeDiff) {
+    const minutes = new Date(timeDiff).getMinutes()
+    return (minutes + '').padStart(2, '0')
+}
+
+function restartTimer() {
+    clearInterval(gTimerInterval)
+    document.querySelector('.seconds').innerText = '00'
+    document.querySelector('.minutes').innerText = '00'
+}
+
+function reduceLives() {
+    gGame.lives += -1 
+    renderLives()
+}

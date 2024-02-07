@@ -22,6 +22,10 @@ table {
     background-color: white;
 }
 
+.mine {
+    background-color: red;
+}
+
 .modal {
     background-color: rgb(109, 109, 109);
     border: 2px solid rgb(0, 0, 0);
@@ -38,4 +42,9 @@ table {
 
 h4 {
     font-size: 12px;
+}
+
+.lives {
+    color: red;
+    font-size: 30px;
 }
