@@ -11,3 +11,14 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min) + min)
 }
+
+
+function showModal() {
+    const elModal = document.querySelector('.modal')
+    elModal.classList.remove('hide')
+}
+
+function hideModal() {
+    const elModal = document.querySelector('.modal')
+    elModal.classList.add('hide')
+}

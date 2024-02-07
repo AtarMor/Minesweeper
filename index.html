@@ -10,10 +10,24 @@
 
 <body onload="onInit()">
     <h1>Minesweeper</h1>
+
+    <p class="levels"> 
+      <h3>Game level:</h3>
+      <button onclick="onChangeLevel(4,2)">Beginner</button>
+      <button onclick="onChangeLevel(8,14)">Intermediate</button>
+      <button onclick="onChangeLevel(12,32)">Expert</button>
+    </p>
+
 		<table>
 			<tbody class="board"></tbody>
 		</table>
     
+    <button onclick="onInit()">Restart</button>
+
+    <div class="modal">
+			<h3></h3>
+			<button onclick="onInit()">Play again</button>
+		</div>
 
     <h5>- made by Atar Mor -</h5>
   <script src="js/util.js"></script>
