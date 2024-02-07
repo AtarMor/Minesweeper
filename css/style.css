@@ -2,6 +2,8 @@ body {
     background-color: rgb(26, 26, 26);
     color: white;
     text-align: center;
+    font-family: monospace;
+    font-size: 18px;
 }
 
 table {
@@ -26,10 +28,14 @@ table {
     width: 150px;
     padding-bottom: 20px;
     position: absolute;
-    top: 100px;
+    top: 10px;
     left: calc(50% - 80px);
 }
 
 .hide {
     display: none;
+}
+
+h4 {
+    font-size: 12px;
 }
