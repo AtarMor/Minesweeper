@@ -25,10 +25,15 @@
     <span class="lives"></span>
   </p>
 
-  <button onclick="onInit()"><span class="smiley-btn"></span></button>
+  <button onclick="onRestart()"><span class="smiley-btn"></span></button>
 
   <table>
     <tbody class="board"></tbody>
+  </table>
+
+  <table>
+    <tbody class="hints">
+    </tbody>
   </table>
 
   <div class="modal">
@@ -36,8 +41,36 @@
     <button onclick="onInit()">Play again</button>
   </div>
 
+  <div class="safe-click">
+    <button onclick="onSafeClick()">Safe click</button>
+    <h6 class="remain-clicks"><span></span> clicks available</h6>
+  </div>
+
+  <table class="scores-table">
+    <thead>
+      <tr>Best Scores:</tr>
+      <tr>
+        <td>Beginner</td>
+        <td>Intermediate</td>
+        <td>Expert</td>
+      </tr>
+    </thead>
+    <tbody class="best-scores">
+      <tr>
+        <td class="beg-best-score">?</td>
+        <td class="inter-best-score">?</td>
+        <td class="exp-best-score">?</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button class="remain-mines" onclick="onManuallyMines()">Manually position mines</button>
+  <h6 class="remain-mines"><span></span></h6>
+
   <h4>- made by Atar Mor -</h4>
+
   <script src="js/util.js"></script>
+  <script src="js/additionalFeaturs.js"></script>
   <script src="js/app.js"></script>
 </body>
 

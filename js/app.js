@@ -6,6 +6,7 @@ const FLAG = '🚩'
 const SMILEY = '😃'
 const LOSS = '🤯'
 const VICTORY = '😎'
+const HINT_IMG = '<img src="img/hint.png">'
 
 var gGame
 var gBoard
@@ -15,6 +16,10 @@ var gLevel = {
 }
 var gTimerInterval
 var gLives
+var gManuallyMinesMode = false
+var gBegBestScore = localStorage.begScore
+var gInterBestScore = localStorage.interScore
+var gExpBestScore = localStorage.expScore
 
 function onInit() {
     hideModal()
@@ -25,14 +30,21 @@ function onInit() {
         shownCount: 0,
         markedCount: 0,
         lives: gLives,
+        hintMode: false,
+        safeClicks: 3,
     }
     gBoard = buildBoard()
-    setMinesLocations()
+    if (!gManuallyMinesMode) setMinesLocations()
     setMinesNegsCount()
     renderBoard()
     renderLives()
+    renderHints()
+    renderSafeClicks()
+    renderBestScores()
     const elSmiley = document.querySelector('.smiley-btn')
     elSmiley.innerText = SMILEY
+    const elRemainMines = document.querySelector('.remain-mines span')
+    elRemainMines.innerHTML = ''
 }
 
 function buildBoard() {
@@ -65,14 +77,6 @@ function renderBoard() {
     }
     const elBoard = document.querySelector('.board')
     elBoard.innerHTML = strHTML
-}
-
-function renderLives() {
-    var livesStr = ''
-    for (let i = 0; i < gGame.lives; i++) {
-        livesStr += '❤️'
-        document.querySelector('.lives').innerText = livesStr
-    }
 }
 
 function setMinesNegsCount() {
@@ -109,11 +113,13 @@ function setMinesLocations() {
 
 function onCellClicked(elCell, i, j) {
     if (!gGame.isOn) return
+    if (gManuallyMinesMode) return userSetMines(elCell, i, j)
     if (gBoard[i][j].isMine && gGame.shownCount === 0) {
         onInit()
     }
     if (gBoard[i][j].isShown) return
     if (gBoard[i][j].isMine && gBoard[i][j].isMarked) return
+    if (gGame.hintMode) return hintMode(i, j)
 
     if (gBoard[i][j].isMine) {
         elCell.classList.add('mine')
@@ -173,12 +179,38 @@ function checkVictory() {
     const elSmiley = document.querySelector('.smiley-btn')
     elSmiley.innerText = VICTORY
     endGame('You Won!')
+
+    var currBestScore = bestScore()
+    switch (gLevel.size) {
+        case 4:
+            localStorage.begScore = currBestScore
+            gBegBestScore = localStorage.begScore
+            break
+        case 8:
+            localStorage.interScore = currBestScore
+            gInterBestScore = localStorage.interScore
+            break
+        case 12:
+            localStorage.expScore = currBestScore
+            gExpBestScore = localStorage.expScore
+            break
+    }
+    renderBestScores()
 }
 
 function gameOver() {
     const elSmiley = document.querySelector('.smiley-btn')
     elSmiley.innerText = LOSS
+    revealAllMines()
     endGame('Game Over!')
+}
+
+function revealAllMines() {
+    for (let i = 0; i < gBoard.length; i++) {
+        for (let j = 0; j < gBoard[0].length; j++) {
+            if (gBoard[i][j].isMine) renderCell({ i, j }, MINE)
+        }
+    }
 }
 
 function endGame(msg) {
@@ -186,12 +218,22 @@ function endGame(msg) {
     const elModalH3 = document.querySelector('.modal h3')
     elModalH3.innerText = msg
     showModal()
+    gManuallyMinesMode = false
+    gCountMines = 0
     gGame.isOn = false
+}
+
+function onRestart() {
+    gManuallyMinesMode = false
+    gCountMines = 0
+    onInit()
 }
 
 function onChangeLevel(size, mines) {
     gLevel.size = size
     gLevel.mines = mines
+    gManuallyMinesMode = false
+    gCountMines = 0
     onInit()
 }
 
@@ -230,7 +272,19 @@ function restartTimer() {
     document.querySelector('.minutes').innerText = '00'
 }
 
-function reduceLives() {
-    gGame.lives += -1 
-    renderLives()
+var minTime = Infinity
+function bestScore() {
+    var currMinutes = 60 * +document.querySelector('.minutes').innerText
+    var currSeconds = +document.querySelector('.seconds').innerText
+    var currTimeInSec = currMinutes + currSeconds
+    if (currTimeInSec < minTime) {
+        minTime = currTimeInSec
+    }
+    return minTime
+}
+
+function renderBestScores() {
+    document.querySelector('.beg-best-score').innerText = gBegBestScore || '-'
+    document.querySelector('.inter-best-score').innerText = gInterBestScore || '-'
+    document.querySelector('.exp-best-score').innerText = gExpBestScore || '-'
 }
