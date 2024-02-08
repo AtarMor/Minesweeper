@@ -68,27 +68,22 @@ function handleHintMode(rowIdx, colIdx) {
 
 function handleMegaHint(i,j) {
     gMegaHint.countClicks++
-    console.log('countClicks:', gMegaHint.countClicks)
     if (gMegaHint.countClicks === 1) {
         gMegaHint.cell1 = { i, j }
     } else if (gMegaHint.countClicks === 2) {
         gMegaHint.cell2 = { i, j }
     }
-    console.log('cell1, cell2:', gMegaHint.cell1, gMegaHint.cell2)
     if (!gMegaHint.cell2) return
-    console.log('AFTER-IF:cell1, cell2:', gMegaHint.cell1, gMegaHint.cell2)
     gGame.megaHintMode = false
     megaHintMode()
 }
 
 function renderMegaHint() {
     const elMegaHint = document.querySelector('.mega-hint button')
-    console.log('elMegaHint:', elMegaHint)
     elMegaHint.classList.remove('used')
 }
 
 function onMegaHintClick(elMegaHint) {
-    console.log('elMegaHintFunc:', elMegaHint)
     if (gManuallyMinesMode) return
     if (gMegaHint.countClicks) return
     gGame.megaHintMode = true
@@ -136,7 +131,6 @@ function onSafeClick() {
     const elSafeCell = document.querySelector(`.cell-${randCell.i}-${randCell.j}`)
     elSafeCell.classList.add('highlight')
     setTimeout(() => {
-        console.log('hi')
         elSafeCell.classList.remove('highlight')
     }, 1000)
 
@@ -185,5 +179,5 @@ function renderManuallyMines() {
 /// MINES EXTERMINATOR ///
 
 function onExterminator() {
-    alert('Coming Soon!')
+    alert('Coming soon!')
 }
