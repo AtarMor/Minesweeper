@@ -16,10 +16,13 @@ var gLevel = {
 }
 var gTimerInterval
 var gLives
+var gMegaHint
 var gManuallyMinesMode = false
-var gBegBestScore = localStorage.begScore
-var gInterBestScore = localStorage.interScore
-var gExpBestScore = localStorage.expScore
+var gBestScores = {
+    beginner: localStorage.begScore,
+    intermediate: localStorage.interScore,
+    expert: localStorage.expScore
+}
 
 function onInit() {
     hideModal()
@@ -31,20 +34,34 @@ function onInit() {
         markedCount: 0,
         lives: gLives,
         hintMode: false,
+        megaHintMode: false,
         safeClicks: 3,
     }
+    gMegaHint = {
+        countClicks: 0,
+        cell1: '',
+        cell2: ''
+    }
     gBoard = buildBoard()
-    if (!gManuallyMinesMode) setMinesLocations()
+    setMinesLocations()
     setMinesNegsCount()
+
+    renderGame()
+}
+
+function renderGame() {
     renderBoard()
     renderLives()
     renderHints()
+    renderMegaHint()
     renderSafeClicks()
     renderBestScores()
+
     const elSmiley = document.querySelector('.smiley-btn')
     elSmiley.innerText = SMILEY
-    const elRemainMines = document.querySelector('.remain-mines span')
-    elRemainMines.innerHTML = ''
+
+    const elRemainMines = document.querySelector('h6.remain-mines')
+    elRemainMines.innerHTML = 'position Mines'
 }
 
 function buildBoard() {
@@ -60,7 +77,6 @@ function buildBoard() {
             }
         }
     }
-    // board[1][1].isMine = board[2][3].isMine = true
     return board
 }
 
@@ -89,11 +105,14 @@ function setMinesNegsCount() {
 
 function countNegsMines(rowIdx, colIdx) {
     var negsCount = 0
+
     for (let i = rowIdx - 1; i <= rowIdx + 1; i++) {
         if (i < 0 || i >= gBoard.length) continue
+
         for (let j = colIdx - 1; j <= colIdx + 1; j++) {
             if (i === rowIdx && j === colIdx) continue
             if (j < 0 || j >= gBoard[0].length) continue
+
             var currCell = gBoard[i][j]
             if (currCell.isMine) negsCount++
         }
@@ -102,6 +121,8 @@ function countNegsMines(rowIdx, colIdx) {
 }
 
 function setMinesLocations() {
+    if (gManuallyMinesMode) return
+
     for (let i = 0; i < gLevel.mines; i++) {
         var randCell = getRandCell()
         while (gBoard[randCell.i][randCell.j].isMine) {
@@ -113,15 +134,18 @@ function setMinesLocations() {
 
 function onCellClicked(elCell, i, j) {
     if (!gGame.isOn) return
+
     if (gManuallyMinesMode) return userSetMines(elCell, i, j)
-    if (gBoard[i][j].isMine && gGame.shownCount === 0) {
-        onInit()
-    }
-    if (gBoard[i][j].isShown) return
-    if (gBoard[i][j].isMine && gBoard[i][j].isMarked) return
-    if (gGame.hintMode) return hintMode(i, j)
+    if (gGame.megaHintMode) return handleMegaHint(i, j)
+    if (gGame.hintMode) return handleHintMode(i, j)
+
+    if (gBoard[i][j].isShown || gBoard[i][j].isMarked) return
+
+    if (gBoard[i][j].isMine && gGame.shownCount === 0) onInit()
 
     if (gBoard[i][j].isMine) {
+        gBoard[i][j].isShown = true
+        gGame.shownCount++
         elCell.classList.add('mine')
         renderCell({ i, j }, MINE)
         reduceLives()
@@ -129,22 +153,26 @@ function onCellClicked(elCell, i, j) {
     } else {
         expandShown(i, j)
     }
+
     checkVictory()
 }
 
 function onCellMarked(ev, i, j) {
     ev.preventDefault()
     if (!gGame.isOn) return
+    if (gBoard[i][j].isShown) return
+    
     if (!gBoard[i][j].isMarked) {
         gBoard[i][j].isMarked = true
         gGame.markedCount++
         renderCell({ i, j }, FLAG)
         checkVictory()
-    } else {
-        gBoard[i][j].isMarked = false
-        gGame.markedCount--
-        renderCell({ i, j }, '')
+        return
     }
+
+    gBoard[i][j].isMarked = false
+    gGame.markedCount--
+    renderCell({ i, j }, '')
 }
 
 function expandShown(rowIdx, colIdx) {
@@ -175,26 +203,12 @@ function expandShown(rowIdx, colIdx) {
 function checkVictory() {
     const exposedMines = gLives - gGame.lives
     if (gGame.markedCount + exposedMines !== gLevel.mines) return
-    if (gGame.shownCount !== gLevel.size ** 2 - gLevel.mines) return
+    if (gGame.shownCount - exposedMines !== gLevel.size ** 2 - gLevel.mines) return
     const elSmiley = document.querySelector('.smiley-btn')
     elSmiley.innerText = VICTORY
     endGame('You Won!')
 
-    var currBestScore = bestScore()
-    switch (gLevel.size) {
-        case 4:
-            localStorage.begScore = currBestScore
-            gBegBestScore = localStorage.begScore
-            break
-        case 8:
-            localStorage.interScore = currBestScore
-            gInterBestScore = localStorage.interScore
-            break
-        case 12:
-            localStorage.expScore = currBestScore
-            gExpBestScore = localStorage.expScore
-            break
-    }
+    setBestScore()
     renderBestScores()
 }
 
@@ -240,51 +254,4 @@ function onChangeLevel(size, mines) {
 function renderCell(location, value) {
     const elCell = document.querySelector(`.cell-${location.i}-${location.j}`)
     elCell.innerHTML = value
-}
-
-function startTimer() {
-    if (gGame.shownCount === 1) {
-        var startTime = Date.now()
-        clearInterval(gTimerInterval)
-        gTimerInterval = setInterval(() => {
-            const timeDiff = Date.now() - startTime
-            const seconds = getSeconds(timeDiff)
-            const minutes = getMinutes(timeDiff)
-            document.querySelector('.seconds').innerText = seconds
-            document.querySelector('.minutes').innerText = minutes
-        }, 1000)
-    }
-}
-
-function getSeconds(timeDiff) {
-    const seconds = new Date(timeDiff).getSeconds()
-    return (seconds + '').padStart(2, '0')
-}
-
-function getMinutes(timeDiff) {
-    const minutes = new Date(timeDiff).getMinutes()
-    return (minutes + '').padStart(2, '0')
-}
-
-function restartTimer() {
-    clearInterval(gTimerInterval)
-    document.querySelector('.seconds').innerText = '00'
-    document.querySelector('.minutes').innerText = '00'
-}
-
-var minTime = Infinity
-function bestScore() {
-    var currMinutes = 60 * +document.querySelector('.minutes').innerText
-    var currSeconds = +document.querySelector('.seconds').innerText
-    var currTimeInSec = currMinutes + currSeconds
-    if (currTimeInSec < minTime) {
-        minTime = currTimeInSec
-    }
-    return minTime
-}
-
-function renderBestScores() {
-    document.querySelector('.beg-best-score').innerText = gBegBestScore || '-'
-    document.querySelector('.inter-best-score').innerText = gInterBestScore || '-'
-    document.querySelector('.exp-best-score').innerText = gExpBestScore || '-'
 }

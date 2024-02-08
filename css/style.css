@@ -7,7 +7,7 @@ body {
 }
 
 table {
-    margin: 20px auto;
+    margin: 10px auto;
 }
 
 .cell {
@@ -51,7 +51,7 @@ h4 {
     font-size: 30px;
 }
 
-img {
+.hint img {
     width: 30px;
 }
 
@@ -62,6 +62,20 @@ img {
     cursor: pointer;
 }
 
+.mega-hint {
+    position: absolute;
+    top: 175px;
+    right: calc(50% - 170px);
+}
+
+.mega-hint button {
+    background-color: #fa9706;
+    height: 40px;
+    width: 90px;
+    border-radius: 10px;
+    border: 1px solid white
+}
+
 .illuminate img {
     background-color: #a9a92182;
     border-radius: 50%;
@@ -70,7 +84,7 @@ img {
 }
 
 .smiley-btn {
-    width: 50px;
+    /* width: 50px; */
     border-radius: 10px;
 }
 
@@ -88,14 +102,40 @@ h6.remain-mines {
 h6,
 h4 {
     font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+}
+
+h3 {
+    font-family: monospace;
+    font-size: 18px;
+    margin-bottom: 3px;
+    font-weight: lighter;
+}
+
+.safe-click {
+    display: inline-block;
+    margin-inline-start: 10px;
+}
+
+.manual-mines {
+    display: inline-block;
 }
 
 .safe-click button {
     height: 40px;
-    width: 90px;
+    width: 80px;
     background-color: #8bc34a;
     border-radius: 10px;
-    border: 1px solid white
+    border: 1px solid white; 
+    
+}
+
+.manual-mines button {
+    height: 40px;
+    width: 80px;
+    background-color: #d6affb;
+    border-radius: 10px;
+    border: 1px solid white; 
 }
 
 .highlight {
@@ -114,4 +154,27 @@ h4 {
 
 .scores-table td {
     padding: 5px 10px;
+}
+
+.transparent {
+    background-color: transparent;
+    width: 40px;
+    border-radius: 50%;
+}
+
+.used {
+    color: white;
+}
+
+.exterminator {
+    width: 70px;
+    /* position: absolute; */
+    top: 390px;
+    left: calc(50% - 170px);
+    cursor: pointer;
+}
+
+.footer {
+    margin-top: 50px;
+    font-weight: lighter;
 }

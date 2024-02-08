@@ -25,15 +25,15 @@
     <span class="lives"></span>
   </p>
 
-  <button onclick="onRestart()"><span class="smiley-btn"></span></button>
-
-  <table>
-    <tbody class="board"></tbody>
-  </table>
-
+  <button class="transparent" onclick="onRestart()"><span class="smiley-btn"></span></button>
+  
   <table>
     <tbody class="hints">
     </tbody>
+  </table>
+
+  <table>
+    <tbody class="board"></tbody>
   </table>
 
   <div class="modal">
@@ -41,14 +41,25 @@
     <button onclick="onInit()">Play again</button>
   </div>
 
+  <img class="exterminator" onclick="onExterminator()" src="img/exterminator.png">
+
   <div class="safe-click">
     <button onclick="onSafeClick()">Safe click</button>
     <h6 class="remain-clicks"><span></span> clicks available</h6>
   </div>
 
+  <div class="manual-mines">
+    <button class="remain-mines" onclick="onManuallyMines()">Position mines</button>
+    <h6 class="remain-mines">position Mines</h6>
+  </div>
+
+  <div class="mega-hint">
+    <button onclick="onMegaHintClick(this)">Mega hint</button>
+  </div>
+
+  <h3>Best Scores:</h3>
   <table class="scores-table">
     <thead>
-      <tr>Best Scores:</tr>
       <tr>
         <td>Beginner</td>
         <td>Intermediate</td>
@@ -64,13 +75,11 @@
     </tbody>
   </table>
 
-  <button class="remain-mines" onclick="onManuallyMines()">Manually position mines</button>
-  <h6 class="remain-mines"><span></span></h6>
-
-  <h4>- made by Atar Mor -</h4>
+  <h4 class="footer">- made by Atar Mor -</h4>
 
   <script src="js/util.js"></script>
   <script src="js/additionalFeaturs.js"></script>
+  <script src="js/scores.js"></script>
   <script src="js/app.js"></script>
 </body>
 
