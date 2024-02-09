@@ -41,11 +41,11 @@ function handleHintMode(rowIdx, colIdx) {
         for (let j = colIdx - 1; j <= colIdx + 1; j++) {
             if (j < 0 || j >= gBoard[0].length) continue
             var currCell = gBoard[i][j]
-            
+
             if (!currCell.isShown) {
                 const elCell = document.querySelector(`.cell-${i}-${j}`)
                 elCell.classList.add('shown')
-                
+
                 if (gBoard[i][j].isMine) {
                     renderCell({ i, j }, MINE)
                 } else if (gBoard[i][j].minesAroundCount) {
@@ -66,7 +66,7 @@ function handleHintMode(rowIdx, colIdx) {
 
 /// MEGA HINT ///
 
-function handleMegaHint(i,j) {
+function handleMegaHint(i, j) {
     gMegaHint.countClicks++
     if (gMegaHint.countClicks === 1) {
         gMegaHint.cell1 = { i, j }
@@ -179,5 +179,47 @@ function renderManuallyMines() {
 /// MINES EXTERMINATOR ///
 
 function onExterminator() {
-    alert('Coming soon!')
+    if (gLevel.size === 4) return
+    if (gGame.isExterminatorUsed) return
+    gGame.isExterminatorUsed = true
+    for (let i = 0; i < 3; i++) {
+        var randIdx = getRandomInt(0, gMinesLocations.length)
+        var randMine = gMinesLocations[randIdx]
+        gBoard[randMine.i][randMine.j].isMine = false
+        gMinesLocations.splice(randIdx, 1)
+    }
+    gLevel.mines -= 3
+    setMinesNegsCount()
+    renderBoard()
+}
+
+/// UNDO ///
+
+function onUndo() {
+    if (!gMoves.length) return
+    const lastMove = gMoves.pop() // lastMove = {elCell, currCell, i, j}
+    gGame = gGameStates.pop()
+
+    gBoard[lastMove.i][lastMove.j] = lastMove.currCell
+
+    lastMove.elCell.classList.remove('mine')
+    lastMove.elCell.classList.remove('marked')
+    lastMove.elCell.classList.remove('shown')
+    renderCell({ i: lastMove.i, j: lastMove.j }, '')
+    renderGame()
+}
+
+function onDarkMode() {
+    const elDarkModeBtn = document.querySelector('.dark-mode-btn')
+    const elBody = document.querySelector('body')
+    if (gDarkMode) {
+        elBody.style.backgroundColor = '#dadada'
+        elBody.style.color = 'black'
+        elDarkModeBtn.innerText = 'Dark Mode'
+    } else {
+        elBody.style.backgroundColor = 'rgb(40 40 40)'
+        elBody.style.color = 'white'
+        elDarkModeBtn.innerText = 'Light Mode'
+    }
+    gDarkMode = !gDarkMode
 }

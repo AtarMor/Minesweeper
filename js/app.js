@@ -9,6 +9,7 @@ const VICTORY = '😎'
 const HINT_IMG = '<img src="img/hint.png">'
 
 var gGame
+var gDarkMode
 var gBoard
 var gLevel = {
     size: 4,
@@ -23,10 +24,17 @@ var gBestScores = {
     intermediate: localStorage.interScore,
     expert: localStorage.expScore
 }
+var gMinesLocations = []
+var gGameStates = []
+var gMoves = []
 
 function onInit() {
     hideModal()
     restartTimer()
+    gDarkMode = true
+    gMinesLocations = []
+    gGameStates = []
+    gMoves = []
     gLives = gLevel.mines > 2 ? 3 : 2
     gGame = {
         isOn: true,
@@ -36,6 +44,7 @@ function onInit() {
         hintMode: false,
         megaHintMode: false,
         safeClicks: 3,
+        isExterminatorUsed: false
     }
     gMegaHint = {
         countClicks: 0,
@@ -46,11 +55,11 @@ function onInit() {
     setMinesLocations()
     setMinesNegsCount()
 
+    renderBoard()
     renderGame()
 }
 
 function renderGame() {
-    renderBoard()
     renderLives()
     renderHints()
     renderMegaHint()
@@ -87,7 +96,7 @@ function renderBoard() {
         for (let j = 0; j < gBoard[0].length; j++) {
             const cell = ""
             const className = `cell cell-${i}-${j}`
-            strHTML += `<td class="${className}" onclick="onCellClicked(this,${i},${j})" oncontextmenu="onCellMarked(event,${i},${j})"></td>`
+            strHTML += `<td class="${className}" onclick="onCellClicked(this,${i},${j})" oncontextmenu="onCellMarked(event,this,${i},${j})"></td>`
         }
         strHTML += '</tr>'
     }
@@ -129,11 +138,22 @@ function setMinesLocations() {
             randCell = getRandCell()
         }
         gBoard[randCell.i][randCell.j].isMine = true
+        gMinesLocations.push({ i: randCell.i, j: randCell.j })
     }
+}
+
+/// ON CELL CLICK ///
+
+function saveGameState(elCell, i, j) {
+    gGameStates.push(structuredClone(gGame))
+    const currCell = structuredClone(gBoard[i][j])
+    gMoves.push({ elCell, currCell, i, j })
 }
 
 function onCellClicked(elCell, i, j) {
     if (!gGame.isOn) return
+
+    saveGameState(elCell, i, j)
 
     if (gManuallyMinesMode) return userSetMines(elCell, i, j)
     if (gGame.megaHintMode) return handleMegaHint(i, j)
@@ -157,11 +177,13 @@ function onCellClicked(elCell, i, j) {
     checkVictory()
 }
 
-function onCellMarked(ev, i, j) {
+function onCellMarked(ev, elCell, i, j) {
     ev.preventDefault()
     if (!gGame.isOn) return
     if (gBoard[i][j].isShown) return
-    
+
+    saveGameState(elCell, i, j)
+
     if (!gBoard[i][j].isMarked) {
         gBoard[i][j].isMarked = true
         gGame.markedCount++
@@ -180,10 +202,12 @@ function expandShown(rowIdx, colIdx) {
     if (colIdx < 0 || colIdx >= gBoard[0].length) return
     if (gBoard[rowIdx][colIdx].isShown) return
 
+    const elCell = document.querySelector(`.cell-${rowIdx}-${colIdx}`)
+    saveGameState(elCell, rowIdx, colIdx)
+
     gBoard[rowIdx][colIdx].isShown = true
     gGame.shownCount++
     startTimer()
-    const elCell = document.querySelector(`.cell-${rowIdx}-${colIdx}`)
     elCell.classList.add('shown')
 
     if (gBoard[rowIdx][colIdx].minesAroundCount) {
