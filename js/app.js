@@ -61,16 +61,20 @@ function onInit() {
 
 function renderGame() {
     renderLives()
+    renderMinesCount()
     renderHints()
     renderMegaHint()
     renderSafeClicks()
     renderBestScores()
 
-    const elSmiley = document.querySelector('.smiley-btn')
+    const elSmiley = document.querySelector('.smiley-btn span')
     elSmiley.innerText = SMILEY
 
-    const elRemainMines = document.querySelector('h6.remain-mines')
-    elRemainMines.innerHTML = 'position Mines'
+    const elRemainMines = document.querySelector('.manual-mines h6')
+    elRemainMines.innerHTML = 'Click to set'
+
+    document.querySelector('.exterminator').classList.remove('used')
+    document.querySelector('.safe-click button').classList.remove('used')
 }
 
 function buildBoard() {
@@ -142,16 +146,17 @@ function setMinesLocations() {
     }
 }
 
-/// ON CELL CLICK ///
-
 function saveGameState(elCell, i, j) {
     gGameStates.push(structuredClone(gGame))
     const currCell = structuredClone(gBoard[i][j])
     gMoves.push({ elCell, currCell, i, j })
 }
 
+/// LEFT CLICK ///
+
 function onCellClicked(elCell, i, j) {
     if (!gGame.isOn) return
+    if (gBoard[i][j].isShown || gBoard[i][j].isMarked) return
 
     saveGameState(elCell, i, j)
 
@@ -159,9 +164,12 @@ function onCellClicked(elCell, i, j) {
     if (gGame.megaHintMode) return handleMegaHint(i, j)
     if (gGame.hintMode) return handleHintMode(i, j)
 
-    if (gBoard[i][j].isShown || gBoard[i][j].isMarked) return
+    if (gBoard[i][j].isMine && gGame.shownCount === 0) {
+        onInit()
+        return onCellClicked(elCell, i, j)
+    }
 
-    if (gBoard[i][j].isMine && gGame.shownCount === 0) onInit()
+    disableExterminator()
 
     if (gBoard[i][j].isMine) {
         gBoard[i][j].isShown = true
@@ -169,6 +177,7 @@ function onCellClicked(elCell, i, j) {
         elCell.classList.add('mine')
         renderCell({ i, j }, MINE)
         reduceLives()
+        renderMinesCount()
         if (!gGame.lives) return gameOver()
     } else {
         expandShown(i, j)
@@ -177,7 +186,10 @@ function onCellClicked(elCell, i, j) {
     checkVictory()
 }
 
+/// RIGHT CLICK ///
+
 function onCellMarked(ev, elCell, i, j) {
+    disableExterminator()
     ev.preventDefault()
     if (!gGame.isOn) return
     if (gBoard[i][j].isShown) return
@@ -188,6 +200,7 @@ function onCellMarked(ev, elCell, i, j) {
         gBoard[i][j].isMarked = true
         gGame.markedCount++
         renderCell({ i, j }, FLAG)
+        renderMinesCount()
         checkVictory()
         return
     }
@@ -195,6 +208,7 @@ function onCellMarked(ev, elCell, i, j) {
     gBoard[i][j].isMarked = false
     gGame.markedCount--
     renderCell({ i, j }, '')
+    renderMinesCount()
 }
 
 function expandShown(rowIdx, colIdx) {
@@ -207,8 +221,8 @@ function expandShown(rowIdx, colIdx) {
 
     gBoard[rowIdx][colIdx].isShown = true
     gGame.shownCount++
-    startTimer()
     elCell.classList.add('shown')
+    startTimer()
 
     if (gBoard[rowIdx][colIdx].minesAroundCount) {
         renderCell({ i: rowIdx, j: colIdx }, gBoard[rowIdx][colIdx].minesAroundCount)
@@ -228,7 +242,7 @@ function checkVictory() {
     const exposedMines = gLives - gGame.lives
     if (gGame.markedCount + exposedMines !== gLevel.mines) return
     if (gGame.shownCount - exposedMines !== gLevel.size ** 2 - gLevel.mines) return
-    const elSmiley = document.querySelector('.smiley-btn')
+    const elSmiley = document.querySelector('.smiley-btn span')
     elSmiley.innerText = VICTORY
     endGame('You Won!')
 
@@ -237,7 +251,7 @@ function checkVictory() {
 }
 
 function gameOver() {
-    const elSmiley = document.querySelector('.smiley-btn')
+    const elSmiley = document.querySelector('.smiley-btn span')
     elSmiley.innerText = LOSS
     revealAllMines()
     endGame('Game Over!')
@@ -253,17 +267,17 @@ function revealAllMines() {
 
 function endGame(msg) {
     clearInterval(gTimerInterval)
-    const elModalH3 = document.querySelector('.modal h3')
-    elModalH3.innerText = msg
+    const elModalH2 = document.querySelector('.modal h2')
+    elModalH2.innerText = msg
     showModal()
     gManuallyMinesMode = false
-    gCountMines = 0
+    gManuallyMines = 0
     gGame.isOn = false
 }
 
 function onRestart() {
     gManuallyMinesMode = false
-    gCountMines = 0
+    gManuallyMines = 0
     onInit()
 }
 
@@ -271,7 +285,7 @@ function onChangeLevel(size, mines) {
     gLevel.size = size
     gLevel.mines = mines
     gManuallyMinesMode = false
-    gCountMines = 0
+    gManuallyMines = 0
     onInit()
 }
 

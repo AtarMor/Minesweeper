@@ -21,11 +21,14 @@
   <p class="timer">
     Timer:
     <span class="minutes">00</span>:<span class="seconds">00</span> |
+    Mines:
+    <span class="mines"></span> |
     Lives:
     <span class="lives"></span>
   </p>
 
-  <button class="transparent" onclick="onRestart()"><span class="smiley-btn"></span></button>
+  <div class="smiley-btn" title="restart" onclick="onRestart()"><span></span>
+  </div>
   
   <table>
     <tbody class="hints">
@@ -37,24 +40,24 @@
   </table>
 
   <div class="modal">
-    <h3></h3>
+    <h2></h2>
     <button onclick="onInit()">Play again</button>
   </div>
 
-  <img class="exterminator" onclick="onExterminator()" src="img/exterminator.png">
+  <img class="exterminator" title="eliminate 3 mines" onclick="onExterminator()" src="img/exterminator.png">
 
   <div class="safe-click">
-    <button onclick="onSafeClick()">Safe click</button>
+    <button onclick="onSafeClick()" title="marks a safe cell">Safe click</button>
     <h6 class="remain-clicks"><span></span> clicks available</h6>
   </div>
 
   <div class="manual-mines">
-    <button class="remain-mines" onclick="onManuallyMines()">Position mines</button>
-    <h6 class="remain-mines">position Mines</h6>
+    <button class="remain-mines" title="set mines manually" onclick="onManuallyMines()">Set mines</button>
+    <h6></h6>
   </div>
 
   <div class="mega-hint">
-    <button onclick="onMegaHintClick(this)">Mega hint</button>
+    <button title="choose an area to reveal" onclick="onMegaHintClick(this)">Mega hint</button>
   </div>
 
   <h3>Best Scores:</h3>

@@ -7,7 +7,9 @@ body {
 }
 
 table {
-    margin: 10px auto;
+    margin: 15px auto;
+    border-spacing: 1px;
+    /* background-color: rgb(165, 162, 162); */
 }
 
 .cell {
@@ -17,24 +19,29 @@ table {
     color: black;
     background-color: rgb(177, 176, 176);
     box-sizing: border-box;
+    border-style:outset; 
 }
 
 .shown {
-    background-color: white;
+    background-color: rgb(237, 236, 236);
+    box-shadow: none;
+    border-style:inset; 
 }
 
 .mine {
     background-color: red;
+    box-shadow: none;
+    border-style:inset; 
 }
 
 .modal {
-    background-color: rgb(109, 109, 109);
+    background-color: rgb(40 40 40 / 96%);
     border: 2px solid rgb(0, 0, 0);
     width: 150px;
     padding-bottom: 20px;
     position: absolute;
-    top: 10px;
-    left: calc(50% - 80px);
+    top: 250px;
+    left: calc(50% - 77px);
 }
 
 .hide {
@@ -51,26 +58,31 @@ h4 {
     font-size: 30px;
 }
 
+td.hint {
+    width: 35px;
+    height: 40px;
+}
+
 .hint img {
     width: 30px;
 }
 
 .hints {
     position: absolute;
-    top: 175px;
-    left: calc(50% - 170px);
+    top: 180px;
+    left: calc(50% - 160px);
     cursor: pointer;
 }
 
 .mega-hint {
     position: absolute;
-    top: 175px;
-    right: calc(50% - 170px);
+    top: 185px;
+    right: calc(50% - 140px);
 }
 
 .mega-hint button {
     background-color: #fa9706;
-    height: 40px;
+    height: 35px;
     width: 80px;
     border-radius: 10px;
     border: 1px solid white
@@ -80,12 +92,14 @@ h4 {
     background-color: #a9a92182;
     border-radius: 50%;
     padding: 2px;
-
 }
 
 .smiley-btn {
-    /* width: 50px; */
-    border-radius: 10px;
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+    margin: auto;
+    cursor: pointer;
 }
 
 button {
@@ -93,10 +107,10 @@ button {
 }
 
 h6.remain-clicks,
-h6.remain-mines {
+.manual-mines h6 {
     font-size: 12px;
     font-weight: lighter;
-    margin-top: 3px;
+    margin-top: 5px;
 }
 
 h6,
@@ -106,36 +120,57 @@ h4 {
 }
 
 h3 {
+    margin-top: 30px;
     font-family: monospace;
     font-size: 18px;
     margin-bottom: 3px;
     font-weight: lighter;
 }
 
+h2 {
+    font-family: monospace;
+    font-size: 18px;
+    margin-bottom: 8px;
+    font-weight: lighter;
+}
+
 .safe-click {
     display: inline-block;
-    margin-inline-start: 10px;
+    margin-inline-start: 40px;
+}
+
+.safe-click button:hover {
+    background-color: #c6ee96;
+}
+
+.mega-hint button:hover {
+    background-color: #f7b452;
+}
+
+.manual-mines button:hover {
+    background-color: #e1ccf4;
 }
 
 .manual-mines {
     display: inline-block;
+    margin-inline-start: 30px;
 }
 
 .safe-click button {
-    height: 40px;
+    height: 35px;
     width: 80px;
-    background-color: #8bc34a;
+    background-color: #a9de6c;
     border-radius: 10px;
-    border: 1px solid white; 
-    
+    border: 1px solid white;
+    /* margin-inline-start: 20px; */
 }
 
 .manual-mines button {
-    height: 40px;
+    height: 35px;
     width: 80px;
     background-color: #d6affb;
     border-radius: 10px;
-    border: 1px solid white; 
+    border: 1px solid white;
 }
 
 .highlight {
@@ -162,16 +197,15 @@ h3 {
     border-radius: 50%;
 }
 
-.used {
-    color: white;
-}
-
 .exterminator {
     width: 70px;
-    /* position: absolute; */
     top: 390px;
     left: calc(50% - 170px);
     cursor: pointer;
+}
+
+.used {
+    cursor: not-allowed;
 }
 
 .footer {

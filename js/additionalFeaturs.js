@@ -1,6 +1,14 @@
 'use strict'
 
-var gCountMines
+var gManuallyMines
+
+/// MINES COUNT ///
+
+function renderMinesCount() {
+    const exposedMines = gLives - gGame.lives
+    const elMines = document.querySelector('.mines')
+    elMines.innerText = gLevel.mines - gGame.markedCount - exposedMines
+}
 
 /// LIVES ///
 
@@ -22,7 +30,7 @@ function reduceLives() {
 function renderHints() {
     var strHTML = '<tr>'
     for (let i = 0; i < 3; i++) {
-        strHTML += `<td class="hint" onclick="onHintClick(this)">${HINT_IMG}</td>`
+        strHTML += `<td class="hint" title="hint" onclick="onHintClick(this)">${HINT_IMG}</td>`
     }
     strHTML += '</tr>'
     document.querySelector('.hints').innerHTML = strHTML
@@ -62,6 +70,7 @@ function handleHintMode(rowIdx, colIdx) {
         }
     }
     document.querySelector('.illuminate').innerText = ''
+    document.querySelector('.illuminate').classList.remove('illuminate')
 }
 
 /// MEGA HINT ///
@@ -87,7 +96,6 @@ function onMegaHintClick(elMegaHint) {
     if (gManuallyMinesMode) return
     if (gMegaHint.countClicks) return
     gGame.megaHintMode = true
-    elMegaHint.classList.add('used')
 }
 
 function megaHintMode() {
@@ -108,6 +116,8 @@ function megaHintMode() {
                 setTimeout(() => {
                     elCell.classList.remove('shown')
                     renderCell({ i, j }, '')
+                    const elMegaHint = document.querySelector('.mega-hint button')
+                    elMegaHint.classList.add('used')
                 }, 2000)
             }
         }
@@ -123,7 +133,8 @@ function renderSafeClicks() {
 
 function onSafeClick() {
     if (gGame.shownCount === gLevel.size ** 2 - gLevel.mines) return
-    if (!gGame.safeClicks) return
+    if (!gGame.safeClicks) return 
+    gGame.safeClicks -= 1
     var randCell = getRandCell()
     while (gBoard[randCell.i][randCell.j].isMine || gBoard[randCell.i][randCell.j].isShown) {
         randCell = getRandCell()
@@ -132,9 +143,9 @@ function onSafeClick() {
     elSafeCell.classList.add('highlight')
     setTimeout(() => {
         elSafeCell.classList.remove('highlight')
+        if (!gGame.safeClicks) document.querySelector('.safe-click button').classList.add('used')
     }, 1000)
 
-    gGame.safeClicks -= 1
     renderSafeClicks()
 }
 
@@ -142,7 +153,7 @@ function onSafeClick() {
 
 function onManuallyMines() {
     gManuallyMinesMode = true
-    gCountMines = 0
+    gManuallyMines = 0
     onInit()
     renderManuallyMines()
 }
@@ -152,12 +163,12 @@ function userSetMines(elCell, i, j) {
     if (clickedCell.isMine) return
     clickedCell.isMine = true
     renderCell({ i, j }, MINE)
-    gCountMines++
+    gManuallyMines++
     renderManuallyMines()
-    if (gCountMines === gLevel.mines) {
+    if (gManuallyMines === gLevel.mines) {
         setTimeout(() => {
             gManuallyMinesMode = false
-            gCountMines = 0
+            gManuallyMines = 0
             setMinesNegsCount()
             renderBoard()
             return
@@ -167,18 +178,19 @@ function userSetMines(elCell, i, j) {
 
 function renderManuallyMines() {
     var htmlStr
-    if (!(gLevel.mines - gCountMines)) {
+    if (!(gLevel.mines - gManuallyMines)) {
         htmlStr = `Mines sre set!`
     } else {
-        htmlStr = `${gLevel.mines - gCountMines} mines left`
+        htmlStr = `${gLevel.mines - gManuallyMines} mines left`
     }
-    const elRemainMines = document.querySelector('h6.remain-mines')
+    const elRemainMines = document.querySelector('.manual-mines h6')
     elRemainMines.innerHTML = htmlStr
 }
 
 /// MINES EXTERMINATOR ///
 
 function onExterminator() {
+    if (gGame.shownCount > 0) return
     if (gLevel.size === 4) return
     if (gGame.isExterminatorUsed) return
     gGame.isExterminatorUsed = true
@@ -191,6 +203,13 @@ function onExterminator() {
     gLevel.mines -= 3
     setMinesNegsCount()
     renderBoard()
+    renderMinesCount()
+    setTimeout(disableExterminator, 500)
+}
+
+function disableExterminator() {
+    var extIcon = document.querySelector('.exterminator')
+    extIcon.classList.add('used')
 }
 
 /// UNDO ///
@@ -209,17 +228,22 @@ function onUndo() {
     renderGame()
 }
 
+/// DARK MODE ///
+
 function onDarkMode() {
     const elDarkModeBtn = document.querySelector('.dark-mode-btn')
     const elBody = document.querySelector('body')
+    const elModal = document.querySelector('.modal')
     if (gDarkMode) {
-        elBody.style.backgroundColor = '#dadada'
+        elBody.style.backgroundColor = '#d1cac1b3'
         elBody.style.color = 'black'
         elDarkModeBtn.innerText = 'Dark Mode'
+        elModal.style.backgroundColor = 'rgb(222 217 211)'
     } else {
         elBody.style.backgroundColor = 'rgb(40 40 40)'
         elBody.style.color = 'white'
         elDarkModeBtn.innerText = 'Light Mode'
+        elModal.style.backgroundColor = 'rgb(40 40 40 / 96%)'
     }
     gDarkMode = !gDarkMode
 }
